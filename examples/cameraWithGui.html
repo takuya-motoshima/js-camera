@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1">
+  <title>Camera with GUI</title>
+  <style>
+    .actions {
+      position: absolute;
+      z-index: 10001;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      padding: 10px 0;
+      text-align: center;
+    }
+
+      .actions button.disabled {
+        pointer-events: none;
+        border: 1px solid #999;
+        background-color: #ccc;
+        color: #666;
+      }
+
+    .capture-container {
+      position: absolute;
+      z-index: 10002;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+    }
+
+    .capture-container.hide {
+      display: none;
+    }
+
+      .capture {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+
+      .capture-close {
+        position: absolute;
+        z-index: 10003;
+        top: 0;
+        right: 0;
+        margin: 10px;
+        display: block;
+        width: 24px;
+        height: 24px;
+        background: #000;
+        border-radius: 0.25rem;
+      }
+
+        .capture-close svg {
+          display: block;
+          width: 100%;
+          height: 100%;
+        }
+
+      .capture-info {
+        position: absolute;
+        top: 0;
+        left: 0;
+        color: #fff;
+        font: 11px 'Lucida Grande', sans-serif;
+        text-shadow: 0 -1px 0 #111;
+        border-collapse: collapse;
+      }
+        
+        .capture-info th {
+          font-weight: 400;
+          padding: 3px 4px 3px 5px;
+          text-align: right;
+        }
+
+        .capture-info th,
+        .capture-info td {
+          padding: 3px 4px 3px 5px;
+        }
+  </style>
+</head>
+<body>
+
+  <js-camera id="camera" dat-gui></js-camera>
+
+  <div id="captureContainer" class="capture-container hide">
+    <img id="captureImg" class="capture">
+    <a id="btnCaptureClose" class="capture-close" href="#">
+      <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" class="svg-inline--fa fa-times fa-w-10 fa-3x"><path fill="#fff" d="M193.94 256L296.5 153.44l21.15-21.15c3.12-3.12 3.12-8.19 0-11.31l-22.63-22.63c-3.12-3.12-8.19-3.12-11.31 0L160 222.06 36.29 98.34c-3.12-3.12-8.19-3.12-11.31 0L2.34 120.97c-3.12 3.12-3.12 8.19 0 11.31L126.06 256 2.34 379.71c-3.12 3.12-3.12 8.19 0 11.31l22.63 22.63c3.12 3.12 8.19 3.12 11.31 0L160 289.94 262.56 392.5l21.15 21.15c3.12 3.12 8.19 3.12 11.31 0l22.63-22.63c3.12-3.12 3.12-8.19 0-11.31L193.94 256z"></path></svg>
+    </a>
+    <table class="capture-info">
+      <tr><th>Camera Resolution</th><td id="cameraResolution"></td></tr>
+      <tr><th>Capture Resolution</th><td id="captureResolution"></td></tr>
+      <tr><th>Capture Bytes</th><td id="captureBytes"></td></tr>
+    </table>
+  </div>
+
+  <div class="actions">
+    <button id="btnOpen" type="button">Open</button>
+    <button id="btnClose" type="button" class="disabled">Close</button>
+    <button id="btnPause" type="button" class="disabled">Pause</button>
+    <button id="btnPlay" type="button" class="disabled">Play</button>
+    <button id="btnCapture" type="button" class="disabled">Take photo</button>
+  </div>
+
+  <script type="module">
+    import '../dist/build.esm.js';
+
+    /**
+     * Setup controls
+     */
+    function setupControls() {
+      const btnOpen = document.querySelector('#btnOpen');
+      const btnClose = document.querySelector('#btnClose');
+      const btnPause = document.querySelector('#btnPause');
+      const btnPlay = document.querySelector('#btnPlay');
+      const btnCapture = document.querySelector('#btnCapture');
+      const captureContainer = document.querySelector('#captureContainer');
+      const captureImg = document.querySelector('#captureImg');
+      const btnCaptureClose = document.querySelector('#btnCaptureClose');
+      const captureResolution = document.querySelector('#captureResolution');
+      const cameraResolution = document.querySelector('#cameraResolution');
+      const captureBytes = document.querySelector('#captureBytes');
+
+      // Open camera
+      btnOpen.addEventListener('click', async () => {
+        const [ width, height ] = camera.guiState.resolution.split(',');
+        await camera.open(camera.guiState.facing, width, height);
+        btnOpen.classList.add('disabled');
+        btnClose.classList.remove('disabled');
+        btnPause.classList.remove('disabled');
+        btnCapture.classList.remove('disabled');
+      });
+
+      // Close camera
+      btnClose.addEventListener('click', () => {
+        camera.close();
+        btnOpen.classList.remove('disabled');
+        btnClose.classList.add('disabled');
+        btnPause.classList.add('disabled');
+        btnCapture.classList.add('disabled');
+      });
+
+      // Pause camera
+      btnPause.addEventListener('click', () => {
+        camera.pause();
+        btnPause.classList.add('disabled');
+        btnPlay.classList.remove('disabled');
+      });
+
+      // Play camera
+      btnPlay.addEventListener('click', () => {
+        camera.play();
+        btnPause.classList.remove('disabled');
+        btnPlay.classList.add('disabled');
+      });
+
+      // Take a photo
+      btnCapture.addEventListener('click', () => {
+        // Get the photo data taken
+        const option = { format: camera.guiState.format };// Capture options
+        if (camera.guiState.resize) {
+          option.width = camera.guiState.width;
+          option.height = camera.guiState.height;
+          option.fit = camera.guiState.fit;
+        }
+        const base64 = camera.capture(option);
+
+        // Byte size of capture
+        const bytes = window.atob(base64.split(',')[1]).length;
+
+        // Show results
+        captureImg.setAttribute('src', base64);
+        captureContainer.classList.remove('hide');
+        captureImg.addEventListener('load', () => {
+          cameraResolution.textContent = `${camera.resolution.width}x${camera.resolution.height}`;
+          captureResolution.textContent = `${captureImg.naturalWidth}×${captureImg.naturalHeight}`;
+          captureBytes.textContent = `${Math.floor((bytes / 1024) * 100) / 100} kB`;
+        }, { once: true });
+      });
+
+      // Close captured image
+      btnCaptureClose.addEventListener('click', event => {
+        captureContainer.classList.add('hide');
+      });
+    }
+
+    // Camera controller
+    setupControls();
+
+    // Camera element
+    const camera = document.querySelector('#camera');
+
+    // Camera event listener
+    camera
+      .on('opened', event => {
+        console.log('Opened the camera');
+      })
+      .on('played', event => {
+        console.log('Camera resumed from pause');
+      })
+      .on('paused', event => {
+        console.log('Camera paused');
+      });
+  </script>
+</body>
+</html>

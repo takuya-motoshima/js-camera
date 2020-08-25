@@ -1,0 +1,73 @@
+{
+  "name": "js-camera",
+  "version": "1.0.0",
+  "description": "This is a custom element V1-based camera component.",
+  "main": "dist/build.common.js",
+  "module": "dist/build.esm.js",
+  "browser": "dist/build.js",
+  "types": "types/index.d.ts",
+  "scripts": {
+    "watch": "rollup -c --watch",
+    "prewatch": "rm -rf dist types",
+    "build": "rollup -c",
+    "prebuild": "rm -rf dist types",
+    "test": "jest",
+    "start": "ts-node -r tsconfig-paths/register -P tsconfig.json -O '{\"module\":\"commonjs\"}' -e \"import * as index from '~/index';console.log(index);\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/takuya-motoshima/js-camera.git"
+  },
+  "files": [
+    "dist/*.js",
+    "types/*.d.ts",
+    "package.json",
+    "README.md",
+    "CHANGELOG.md",
+    "examples",
+    "screencap"
+  ],
+  "keywords": [
+    "browser",
+    "javascript",
+    "js",
+    "library",
+    "lib",
+    "module",
+    "typescript",
+    "ts",
+    "esm",
+    "es6",
+    "webcam",
+    "camera"
+  ],
+  "author": "Takuya Motoshima <developer.takuyamotoshima@gmail.com> (https://twitter.com/TakuyaMotoshima)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/takuya-motoshima/js-camera/issues",
+    "email": "developer.takuyamotoshima@gmail.com"
+  },
+  "homepage": "https://github.com/takuya-motoshima/js-camera#readme",
+  "devDependencies": {
+    "@types/jest": "^24.0.23",
+    "fetch-mock": "^8.0.0",
+    "jest": "^24.9.0",
+    "rollup": "^1.27.2",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-json": "^4.0.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-postcss": "^2.2.0",
+    "rollup-plugin-terser": "^5.1.2",
+    "rollup-plugin-typescript2": "^0.25.2",
+    "ts-jest": "^24.1.0",
+    "ts-node": "^8.5.2",
+    "tsconfig-paths": "^3.9.0",
+    "typescript": "^3.8.3"
+  },
+  "dependencies": {
+    "@types/dat.gui": "^0.7.5",
+    "dat.gui": "^0.7.7",
+    "js-scissor": "^1.0.0",
+    "js-shared": "^1.0.2"
+  }
+}
