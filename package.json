@@ -23,6 +23,7 @@
     "types/*.d.ts",
     "package.json",
     "README.md",
+    "API.md",
     "CHANGELOG.md",
     "examples",
     "screencap"
