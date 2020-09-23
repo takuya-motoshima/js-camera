@@ -30,7 +30,7 @@ class Camera extends HTMLElement {
    */
   protected connectedCallback(): void {
     this.state = 'close';
-    if (this.style.position === 'static') this.style.position = 'relative';
+    if (getComputedStyle(this).position === 'static') this.style.position = 'relative';
     this.classList.add('camera');
     this.video.classList.add('camera-video');
     this.video.setAttribute('playsinline', 'true');
