@@ -1,12 +1,11 @@
 import './styles/camera.css';
 import Stream from '~/Stream';
-import { Graphics, Template } from 'js-shared';
+import {Graphics, Template} from 'js-shared';
 import scissor from 'js-scissor';
-import { setupGui, GuiState } from '~/setupGui';
+import {setupGui, GuiState} from '~/setupGui';
 import Constraints from '~/Constraints';
 
 class Camera extends HTMLElement {
-
   public facing: 'front'|'back'|undefined = undefined;
   public guiState: GuiState|undefined = undefined;
   public state: 'open'|'loading'|'close' = 'close';
@@ -30,7 +29,8 @@ class Camera extends HTMLElement {
    */
   protected connectedCallback(): void {
     this.state = 'close';
-    if (getComputedStyle(this).position === 'static') this.style.position = 'relative';
+    if (getComputedStyle(this).position === 'static')
+      this.style.position = 'relative';
     this.classList.add('camera');
     this.video.classList.add('camera-video');
     this.video.setAttribute('playsinline', 'true');
@@ -49,7 +49,8 @@ class Camera extends HTMLElement {
    * @return {this}
    */
   public static define(): any {
-    if (window.customElements.get('js-camera')) return this;
+    if (window.customElements.get('js-camera'))
+      return this;
     window.customElements.define('js-camera', this);
     return this;
   }
@@ -69,15 +70,15 @@ class Camera extends HTMLElement {
    * 
    * @param  {string}           type
    * @param  {() => void}       listener
-   * @param  {{ once: boolen }} options.once
+   * @param  {{once: boolen}} options.once
    * @return {this}
    */
    public on(
      type: string,
      listener: (event?: Event) => void,
-     option: { once: boolean } = { once: false }
+     options: {once: boolean } = {once: false}
    ): Camera {
-    this.addEventListener(type, listener, option);
+    this.addEventListener(type, listener, options);
     return this;
   }
 
@@ -104,7 +105,7 @@ class Camera extends HTMLElement {
    * @return {void}
    */
   private invoke(type: string, detail: {} = {}): void {
-    const event = new CustomEvent(type, { detail });
+    const event = new CustomEvent(type, {detail});
     this.dispatchEvent(event);
   }
 
@@ -116,14 +117,11 @@ class Camera extends HTMLElement {
    * @param  {number} height
    * @return {Promise<void>}
    */
-  public async open(
-    facing: 'front'|'back' = 'back',
-    width?: number,
-    height?: number
-  ): Promise<void> {
+  public async open(facing: 'front'|'back' = 'back', width?: number, height?: number): Promise<void> {
     this.state = 'loading';
     const permission = await this.permission();
-    if (permission === 'denied') await this.revokePermission();
+    if (permission === 'denied')
+      await this.revokePermission();
     if (facing === 'front') {
       this.video.style.transform = 'scaleX(-1)';
       this.video.style.filter = 'FlipH';
@@ -131,17 +129,24 @@ class Camera extends HTMLElement {
       this.video.style.transform = 'scaleX(1)';
       this.video.style.filter = '';
     }
-    let constraints: Constraints = { video: { facingMode: facing === 'front' ? 'user' : 'environment' }, audio: false };
+    let constraints: Constraints = {
+      video: {
+        facingMode: facing === 'front' ? 'user' : 'environment'
+      },
+      audio: false
+    };
+    const attrWidth = this.getAttribute('width') as string;
+    const attrHeight = this.getAttribute('height') as string;
     if (width !== undefined || height !== undefined) {
-      // @ts-ignore
-      if (width) constraints.video.width = { ideal: width };
-      // @ts-ignore
-      if (height) constraints.video.height = { ideal: height }
-    } else if (this.getAttribute('width') || this.getAttribute('height')) {
-      // @ts-ignore
-      if (this.getAttribute('width')) constraints.video.width = { ideal: this.getAttribute('width') };
-      // @ts-ignore
-      if (this.getAttribute('height')) constraints.video.height = { ideal: this.getAttribute('height') }
+      if (width)
+        constraints.video.width = {ideal: width};
+      if (height) 
+        constraints.video.height = {ideal: height}
+    } else if (attrWidth || attrHeight) {
+      if (attrWidth)
+        constraints.video.width = {ideal: parseFloat(attrWidth)};
+      if (attrHeight)
+        constraints.video.height = {ideal: parseFloat(attrHeight)}
     }
     await this.stream.open(constraints);
     this.facing = facing;
@@ -158,8 +163,9 @@ class Camera extends HTMLElement {
    */
   public async waitOpen(): Promise<void> {
     return new Promise(resolve => {
-      if (this.state !== 'loading') return void resolve();
-      this.on('opened', resolve as () => void, { once: true });
+      if (this.state !== 'loading')
+        return void resolve();
+      this.on('opened', resolve as () => void, {once: true});
     });
   }
 
@@ -219,7 +225,8 @@ class Camera extends HTMLElement {
   //  * @return {MediaTrackConstraints|undefined}
   //  */
   // public get constraints(): MediaTrackConstraints|undefined {
-  //   if (!this.tracks.length) return undefined;
+  //   if (!this.tracks.length)
+  //     return undefined;
   //   return this.tracks[0].getConstraints();
   // }
 
@@ -229,7 +236,7 @@ class Camera extends HTMLElement {
    * @return {{width:number,height:number}}
    * [getVideoSize description]
    */
-  public get resolution(): { width: number, height: number } {
+  public get resolution(): {width: number, height: number} {
     return Graphics.getMediaDimensions(this.video);
   }
 
@@ -238,20 +245,20 @@ class Camera extends HTMLElement {
    * 
    * @param  {number} width
    * @param  {number} height
-   * @param  {{ width?: number, height?: number, fit?: 'cover'|'contain'|'fill', format?: 'image/webp'|'image/png'|'image/jpeg' }} option
+   * @param  {{width?: number, height?: number, fit?: 'cover'|'contain'|'fill', format?: 'image/webp'|'image/png'|'image/jpeg'}} options
    * @return {string}
    */
-  public capture(option?: {
+  public capture(options?: {
     width?: number,
     height?: number,
     fit?: 'cover'|'contain'|'fill',
     format?: 'image/webp'|'image/png'|'image/jpeg'
   }): string {
     // Initialize options
-    option = Object.assign({
+    options = Object.assign({
       fit: 'fill',
       format: 'image/png'
-    }, option||{});
+    }, options||{});
 
     // Video viewable area
     const rect = Graphics.getRenderedRect(this.video);
@@ -268,12 +275,19 @@ class Camera extends HTMLElement {
     if (this.facing === 'front')
       Graphics.flipHorizontal(canvas);
 
-    // Returns a capture of the area you are looking at if there are no width and height options
-    if (!option.width && !option.height) return canvas.toDataURL(option.format, 1.);
+    // Returns a capture of the area you are looking at if there are no width and height optionss
+    if (!options.width && !options.height)
+      return canvas.toDataURL(options.format, 1.);
 
     // Resize and return if width and height options are available
     return scissor(canvas)
-      .resize(option.width, option.height, { fit: option.fit, format: option.format })
+      .resize(
+        options.width,
+        options.height,
+        {
+          fit: options.fit,
+          format: options.format
+        })
       .toBase64();
   }
 
@@ -287,8 +301,9 @@ class Camera extends HTMLElement {
    */
   public async permission(): Promise<string|undefined> {
     try {
-      if (!navigator.permissions || !navigator.permissions.query) return undefined;
-      const res = await navigator.permissions.query({ name: 'camera' });
+      if (!navigator.permissions || !navigator.permissions.query)
+        return undefined;
+      const res = await navigator.permissions.query({name: 'camera'});
       return res.state;
     } catch {
       return undefined;
@@ -304,7 +319,8 @@ class Camera extends HTMLElement {
    */
   public async revokePermission(): Promise<void> {
     // @ts-ignore
-    if (!navigator.permissions || !navigator.permissions.revoke) return;
+    if (!navigator.permissions || !navigator.permissions.revoke)
+      return;
     // @ts-ignore
     await navigator.permissions.revoke({name: 'camera'});
   }
@@ -324,7 +340,8 @@ class Camera extends HTMLElement {
    * @return {void}
    */
   private addCameraControl(): void {
-    if (this.getAttribute('controls') === null) return;
+    if (this.getAttribute('controls') === null)
+      return;
     // Added camera play and pause controls
     this.insertAdjacentHTML('afterbegin', `
       <div action-tap-player class="camera-player">
@@ -334,17 +351,21 @@ class Camera extends HTMLElement {
     const playPauseButton = this.querySelector('[action-play-pause]')!;
     playPauseButton.addEventListener('click', event => {
       // event.stopPropagation();
-      if (this.paused) this.play();
-      else this.pause();
+      if (this.paused)
+        this.play();
+      else
+        this.pause();
       // player.classList.remove('fadein');
     });
     // Control display of player menu
     const player = this.querySelector('[action-tap-player]')!;
     let hideTimer: ReturnType<typeof setTimeout>|undefined = undefined;
     player.addEventListener('click', event => {
-      if (hideTimer !== undefined) clearTimeout(hideTimer);
+      if (hideTimer !== undefined)
+        clearTimeout(hideTimer);
       playPauseButton.setAttribute('played', !this.paused ? 'true' : 'false');
-      if (player.classList.contains('fadein')) return void player.classList.remove('fadein');
+      if (player.classList.contains('fadein'))
+        return void player.classList.remove('fadein');
       player.classList.add('fadein');
       hideTimer = setTimeout(() => {
         hideTimer = undefined;
@@ -366,7 +387,7 @@ class Camera extends HTMLElement {
     this.querySelector('[action-capture]')!.addEventListener('click', () => {
       const base64 = this.capture();
       this.querySelector('.camera-captured img')!.setAttribute('src', base64);
-      this.invoke('tookphoto', { base64 });
+      this.invoke('tookphoto', {base64});
     });
 
     // Switch camera face when facing button is pressed
@@ -381,12 +402,14 @@ class Camera extends HTMLElement {
    * @return {void}
    */
   private addCameraMenu(): void {
-    if (this.getAttribute('menu') === null) return;
+    if (this.getAttribute('menu') === null)
+      return;
     const menu = Array.from(this.querySelectorAll('camera-menu-item')).map(menu => ({
       content: menu.innerHTML,
       url: menu.getAttribute('href')
     }));
-    if (this.querySelector('camera-menu') !== null) this.querySelector('camera-menu')!.remove();
+    if (this.querySelector('camera-menu') !== null)
+      this.querySelector('camera-menu')!.remove();
     this.insertAdjacentHTML('afterbegin', Template.compile(`
       <input type="checkbox" id="camera-nav-menustate">
       <nav class="camera-nav" class="touch" role="navigation" aria-label="Camera view navigation" dir="ltr">
@@ -413,7 +436,7 @@ class Camera extends HTMLElement {
             </ul>
           {{/if}}
         </div>
-      </nav>`)({ menu }));
+      </nav>`)({menu}));
   }
 
   /**
@@ -422,15 +445,18 @@ class Camera extends HTMLElement {
    * @return {void}
    */
   private addGui(): void {
-    if (this.getAttribute('dat-gui') === null) return;
+    if (this.getAttribute('dat-gui') === null)
+      return;
     this.guiState = setupGui(this, async (prop: string, value: string|number|boolean): Promise<void> => {
       if (prop === 'resolution') {
-        if (!this.opened) return;
-        const [ width, height ] = (value as string).split(',');
+        if (!this.opened)
+          return;
+        const [width, height] = (value as string).split(',');
         await this.open( this.guiState!.facing as 'front'|'back', parseInt(width, 10), parseInt(height, 10));
       } else if (prop === 'facing') {
-        if (!this.opened) return;
-        const [ width, height ] = this.guiState!.resolution.split(',');
+        if (!this.opened)
+          return;
+        const [width, height] = this.guiState!.resolution.split(',');
         await this.open(value as 'front'|'back', parseInt(width, 10), parseInt(height, 10));
       }
     });

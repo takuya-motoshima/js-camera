@@ -35,10 +35,10 @@ declare class Camera extends HTMLElement {
      *
      * @param  {string}           type
      * @param  {() => void}       listener
-     * @param  {{ once: boolen }} options.once
+     * @param  {{once: boolen}} options.once
      * @return {this}
      */
-    on(type: string, listener: (event?: Event) => void, option?: {
+    on(type: string, listener: (event?: Event) => void, options?: {
         once: boolean;
     }): Camera;
     /**
@@ -117,10 +117,10 @@ declare class Camera extends HTMLElement {
      *
      * @param  {number} width
      * @param  {number} height
-     * @param  {{ width?: number, height?: number, fit?: 'cover'|'contain'|'fill', format?: 'image/webp'|'image/png'|'image/jpeg' }} option
+     * @param  {{width?: number, height?: number, fit?: 'cover'|'contain'|'fill', format?: 'image/webp'|'image/png'|'image/jpeg'}} options
      * @return {string}
      */
-    capture(option?: {
+    capture(options?: {
         width?: number;
         height?: number;
         fit?: 'cover' | 'contain' | 'fill';

@@ -60,7 +60,7 @@ export function setupGui(container: HTMLElement, callback: (prop: string, value:
   };
 
   // GUI object
-  const gui = new dat.GUI({ autoPlace: false });
+  const gui = new dat.GUI({autoPlace: false});
 
   // Camera resolution
   const fldCamera = gui.addFolder('Camera');

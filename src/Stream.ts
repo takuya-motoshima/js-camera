@@ -22,8 +22,8 @@ export default class {
         this.close();
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
         this.video.srcObject = stream;
-        this.video.addEventListener('loadedmetadata', () => resolve(), { once: true });
-        this.video.addEventListener('error', () => reject(this.video.error), { once: true });
+        this.video.addEventListener('loadedmetadata', () => resolve(), {once: true});
+        this.video.addEventListener('error', () => reject(this.video.error), {once: true});
       } catch (e) {
         reject(e);
       }
