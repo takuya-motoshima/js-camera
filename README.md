@@ -58,8 +58,8 @@ camera
   .on('paused', () => {})
   // Returns the photo taken from the shoot button on the camera controller
   // The captured image can be received from "event.detail.dat" in base64 format.
-  .on('tookphoto', event => {
-    console.log(event.detail.base64);// data:image/png;base64,iVB...
+  .on('tookphoto', evt => {
+    console.log(evt.detail.base64.slice(0, 30));// data:image/png;base64,iVB...
   });
 ```
 
@@ -88,20 +88,20 @@ import 'js-camera';
 const camera = document.querySelector('#camera');
 
 // Open camera
-const [ width, height ] = camera.guiState.resolution.split(',');
+const [width, height] = camera.guiState.resolution.split(',');
 await camera.open(camera.guiState.facing, width, height);
 
 // Close camera
 camera.close();
 
 // Take a photo
-const option = { format: camera.guiState.format };// Capture options
+const options = {format: camera.guiState.format};// Capture options
 if (camera.guiState.resize) {
-  option.width = camera.guiState.width;
-  option.height = camera.guiState.height;
-  option.fit = camera.guiState.fit;
+  options.width = camera.guiState.width;
+  options.height = camera.guiState.height;
+  options.fit = camera.guiState.fit;
 }
-const base64 = camera.capture(option);
+const base64 = camera.capture(options);
 console.log(base64);// data:image/png;base64,iVB...
 
 // Pause
@@ -159,36 +159,44 @@ document.querySelector('#btnOpen').addEventListener('click', async () => {
 
 // Close the camera.
 document.querySelector('#btnClose').addEventListener('click', () => {
-  if (!camera.opened) return;
+  if (!camera.opened)
+    return;
   camera.close();
 });
 
 // Pause
 document.querySelector('#btnPause').addEventListener('click', () => {
-  if (!camera.opened) return;
+  if (!camera.opened)
+    return;
   camera.pause();
 });
 
 // Play camera
 document.querySelector('#btnPlay').addEventListener('click', () => {
-  if (!camera.opened) return;
+  if (!camera.opened)
+    return;
   camera.play();
 });
 
 // Take a photo
 document.querySelector('#btnCapture').addEventListener('click', () => {
-  if (!camera.opened) return;
+  if (!camera.opened)
+    return;
   // Get the photo data taken
   let base64 = camera.capture();
   console.log(`Capture: ${base64}`);// Capture: data:image/png;base64,iVBORw0K
 
   // You can specify image/webp, image/png, image/jpeg as the capture format.
   // Default is image/png.
-  base64 = camera.capture({ format: 'image/webp' });
+  base64 = camera.capture({format: 'image/webp'});
   console.log(`WebP capture: ${base64}`);// WebP capture: data:image/webp;base64,UklGRrb
 
   // You can also resize the capture with width, height, and fit options.
-  base64 = camera.capture({ fit: 'cover', width: 300, height: 200 });
+  base64 = camera.capture({
+    fit: 'cover',
+    width: 300,
+    height: 200
+  });
   console.log(`Resize capture: ${base64}`);// Resize capture: data:image/png;base64,iVBORw0K
 });
 ```

@@ -1,0 +1,77 @@
+.actions {
+  position: absolute;
+  z-index: 10001;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 10px 0;
+  text-align: center;
+}
+
+  .actions button.disabled {
+    pointer-events: none;
+    border: 1px solid #999;
+    background-color: #ccc;
+    color: #666;
+  }
+
+.capture-container {
+  position: absolute;
+  z-index: 10002;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+}
+
+.capture-container.hide {
+  display: none;
+}
+
+  .capture {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .capture-close {
+    position: absolute;
+    z-index: 10003;
+    top: 0;
+    right: 0;
+    margin: 10px;
+    display: block;
+    width: 24px;
+    height: 24px;
+    background: #000;
+    border-radius: 0.25rem;
+  }
+
+    .capture-close svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+  .capture-info {
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: #fff;
+    font: 11px 'Lucida Grande', sans-serif;
+    text-shadow: 0 -1px 0 #111;
+    border-collapse: collapse;
+  }
+    
+    .capture-info th {
+      font-weight: 400;
+      padding: 3px 4px 3px 5px;
+      text-align: right;
+    }
+
+    .capture-info th,
+    .capture-info td {
+      padding: 3px 4px 3px 5px;
+    }

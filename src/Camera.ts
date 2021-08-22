@@ -1,9 +1,10 @@
 import './styles/camera.css';
 import Stream from '~/Stream';
-import {Graphics, Template} from 'js-shared';
 import scissor from 'js-scissor';
 import {setupGui, GuiState} from '~/setupGui';
-import Constraints from '~/Constraints';
+import Constraints from '~/interfaces/Constraints';
+import CaptureOptions from '~/interfaces/CaptureOptions';
+import Handlebars from 'handlebars';
 
 class Camera extends HTMLElement {
   public facing: 'front'|'back'|undefined = undefined;
@@ -36,9 +37,9 @@ class Camera extends HTMLElement {
     this.video.setAttribute('playsinline', 'true');
     this.video.setAttribute('muted', 'true');
     this.appendChild(this.video);
-    this.addCameraControl();
-    // this.addCameraMenu();
-    this.addGui();
+    this.setControl();
+    // this.setMenu();
+    this.setGui();
     if (this.getAttribute('autoplay') !== null)
       this.open(this.getAttribute('facing') as 'front'|'back' || 'back');
   }
@@ -46,7 +47,7 @@ class Camera extends HTMLElement {
   /**
    * Define elements
    *
-   * @return {this}
+   * @return {Camera}
    */
   public static define(): any {
     if (window.customElements.get('js-camera'))
@@ -58,7 +59,7 @@ class Camera extends HTMLElement {
   /**
    * Generate elements
    *
-   * @return {this}
+   * @return {Camera}
    */
   public static createElement(): any {
     this.define();
@@ -68,16 +69,12 @@ class Camera extends HTMLElement {
   /**
    * Add event listener
    * 
-   * @param  {string}           type
-   * @param  {() => void}       listener
+   * @param  {string}         type
+   * @param  {() => void}     listener
    * @param  {{once: boolen}} options.once
-   * @return {this}
+   * @return {Camera}
    */
-   public on(
-     type: string,
-     listener: (event?: Event) => void,
-     options: {once: boolean } = {once: false}
-   ): Camera {
+   public on(type: string, listener: (evt?: Event) => void, options: {once: boolean } = {once: false}): Camera {
     this.addEventListener(type, listener, options);
     return this;
   }
@@ -87,12 +84,9 @@ class Camera extends HTMLElement {
    * 
    * @param  {string}     type
    * @param  {() => void} listener
-   * @return {this}
+   * @return {Camera}
    */
-   public off(
-     type: string,
-     listener: (event?: Event) => void
-   ): Camera {
+   public off(type: string, listener: (evt?: Event) => void): Camera {
     this.removeEventListener(type, listener);
     return this;
   }
@@ -101,12 +95,12 @@ class Camera extends HTMLElement {
    * Call event listener
    * 
    * @param  {string} type
-   * @param  {Object}     detail
+   * @param  {Object} detail
    * @return {void}
    */
   private invoke(type: string, detail: {} = {}): void {
-    const event = new CustomEvent(type, {detail});
-    this.dispatchEvent(event);
+    const evt = new CustomEvent(type, {detail});
+    this.dispatchEvent(evt);
   }
 
   /**
@@ -234,61 +228,55 @@ class Camera extends HTMLElement {
    * Return video size
    *
    * @return {{width:number,height:number}}
-   * [getVideoSize description]
    */
   public get resolution(): {width: number, height: number} {
-    return Graphics.getMediaDimensions(this.video);
+    return {width: this.video.videoWidth, height: this.video.videoHeight};
   }
 
   /**
-   * Capture a single frame
+   * Returns the Data URL of the captured image.
    * 
-   * @param  {number} width
-   * @param  {number} height
-   * @param  {{width?: number, height?: number, fit?: 'cover'|'contain'|'fill', format?: 'image/webp'|'image/png'|'image/jpeg'}} options
-   * @return {string}
+   * @param  {CaptureOptions} options
+   * @return {string}         Data URL of the captured image.
    */
-  public capture(options?: {
-    width?: number,
-    height?: number,
-    fit?: 'cover'|'contain'|'fill',
-    format?: 'image/webp'|'image/png'|'image/jpeg'
-  }): string {
+  public capture(options?: CaptureOptions): string {
     // Initialize options
-    options = Object.assign({
-      fit: 'fill',
-      format: 'image/png'
-    }, options||{});
+    options = Object.assign({fit: 'fill', format: 'image/png'}, options || {});
 
     // Video viewable area
-    const rect = Graphics.getRenderedRect(this.video);
+    const rect = this.getRect();
 
     // Generate capture
-    let canvas: HTMLCanvasElement = document.createElement('canvas');
-    canvas.setAttribute('width', rect.width.toString());
-    canvas.setAttribute('height', rect.height.toString());
-    canvas.getContext('2d')!.drawImage(this.video,
+    let captured: HTMLCanvasElement = document.createElement('canvas');
+    captured.setAttribute('width', rect.width.toString());
+    captured.setAttribute('height', rect.height.toString());
+    captured.getContext('2d')!.drawImage(this.video,
       rect.x, rect.y, rect.width, rect.height,
       0, 0, rect.width, rect.height);
 
     // Front camera flip capture
     if (this.facing === 'front')
-      Graphics.flipHorizontal(canvas);
+      this.flip(captured);
 
-    // Returns a capture of the area you are looking at if there are no width and height optionss
-    if (!options.width && !options.height)
-      return canvas.toDataURL(options.format, 1.);
+    // If you have an extract option, crop the image according to the extract option.
+    if (options.extract) {
+      const cropped = document.createElement('canvas');
+      const horRatio = rect.width / this.video.clientWidth;
+      const vrtRatio = rect.height / this.video.clientHeight;
+      cropped.setAttribute('width', (options.extract.width * horRatio).toString());
+      cropped.setAttribute('height', (options.extract.height * vrtRatio).toString());
+      cropped.getContext('2d')!.drawImage(captured,
+        options.extract.x * horRatio, options.extract.y * vrtRatio, options.extract.width * horRatio, options.extract.height * vrtRatio,
+        0, 0, options.extract.width * horRatio, options.extract.height * vrtRatio);
+      captured = cropped;
+    }
 
-    // Resize and return if width and height options are available
-    return scissor(canvas)
-      .resize(
-        options.width,
-        options.height,
-        {
-          fit: options.fit,
-          format: options.format
-        })
-      .toBase64();
+    // Resize and return if width and height options are available.
+    if (options.width || options.height)
+      captured = scissor(captured).resize(options.width, options.height, {fit: options.fit, format: options.format}).canvas;
+
+    // Returns the captured image.
+    return captured.toDataURL(options.format, 1.);
   }
 
   /**
@@ -312,14 +300,12 @@ class Camera extends HTMLElement {
 
   /**
    * Revoke camera access settings
-   * 
    * typescript doesn't support "navigator.permissions.revoke", so don't use it now
    * 
    * @return {Promise<void>}
    */
   public async revokePermission(): Promise<void> {
-    // @ts-ignore
-    if (!navigator.permissions || !navigator.permissions.revoke)
+    if (!navigator.permissions || !('revoke' in navigator.permissions))
       return;
     // @ts-ignore
     await navigator.permissions.revoke({name: 'camera'});
@@ -335,11 +321,11 @@ class Camera extends HTMLElement {
   }
 
   /**
-   * Add camera controller
+   * Set controller
    *
    * @return {void}
    */
-  private addCameraControl(): void {
+  private setControl(): void {
     if (this.getAttribute('controls') === null)
       return;
     // Added camera play and pause controls
@@ -349,7 +335,7 @@ class Camera extends HTMLElement {
       </div>`);
     // Controlling camera play and pause
     const playPauseButton = this.querySelector('[action-play-pause]')!;
-    playPauseButton.addEventListener('click', event => {
+    playPauseButton.addEventListener('click', evt => {
       // event.stopPropagation();
       if (this.paused)
         this.play();
@@ -360,7 +346,7 @@ class Camera extends HTMLElement {
     // Control display of player menu
     const player = this.querySelector('[action-tap-player]')!;
     let hideTimer: ReturnType<typeof setTimeout>|undefined = undefined;
-    player.addEventListener('click', event => {
+    player.addEventListener('click', evt => {
       if (hideTimer !== undefined)
         clearTimeout(hideTimer);
       playPauseButton.setAttribute('played', !this.paused ? 'true' : 'false');
@@ -397,20 +383,20 @@ class Camera extends HTMLElement {
   }
 
   /**
-   * Add camera menu
+   * Set menu
    *
    * @return {void}
    */
-  private addCameraMenu(): void {
+  private setMenu(): void {
     if (this.getAttribute('menu') === null)
       return;
-    const menu = Array.from(this.querySelectorAll('camera-menu-item')).map(menu => ({
-      content: menu.innerHTML,
-      url: menu.getAttribute('href')
-    }));
-    if (this.querySelector('camera-menu') !== null)
-      this.querySelector('camera-menu')!.remove();
-    this.insertAdjacentHTML('afterbegin', Template.compile(`
+    const items = Array
+      .from(this.querySelectorAll('camera-menu-item'))
+      .map(item => ({content: item.innerHTML, url: item.getAttribute('href')}));
+    const menu = this.querySelector('camera-menu');
+    if (menu !== null)
+      menu!.remove();
+    this.insertAdjacentHTML('afterbegin', Handlebars.compile<any>(`
       <input type="checkbox" id="camera-nav-menustate">
       <nav class="camera-nav" class="touch" role="navigation" aria-label="Camera view navigation" dir="ltr">
         <div class="camera-nav-content">
@@ -426,9 +412,9 @@ class Camera extends HTMLElement {
               </label>
             </li>
           </ul>
-          {{#if menu}}
+          {{#if items}}
             <ul class="camera-nav-list">
-              {{#each menu}}
+              {{#each items}}
                 <li class="camera-nav-item camera-nav-item-menu">
                   <a class="camera-nav-link" href="{{url}}">{{content}}</a>
                 </li>
@@ -436,15 +422,15 @@ class Camera extends HTMLElement {
             </ul>
           {{/if}}
         </div>
-      </nav>`)({menu}));
+      </nav>`)({items}));
   }
 
   /**
-   * Add GUI
+   * Set GUI.
    *
    * @return {void}
    */
-  private addGui(): void {
+  private setGui(): void {
     if (this.getAttribute('dat-gui') === null)
       return;
     this.guiState = setupGui(this, async (prop: string, value: string|number|boolean): Promise<void> => {
@@ -460,6 +446,83 @@ class Camera extends HTMLElement {
         await this.open(value as 'front'|'back', parseInt(width, 10), parseInt(height, 10));
       }
     });
+  }
+
+  /**
+   * Returns the display dimensions and position of the video element
+   * 
+   * @return {{x: number, y: number, width: number, height: number}} rect Display size and position of video element
+   *                 x     : The horizontal position of the left-top point where the sourceFrame should be cut,
+   *                 y     : The vertical position of the left-top point where the sourceFrame should be cut,
+   *                 width : How much horizontal space of the sourceFrame should be cut,
+   *                 height: How much vertical space of the sourceFrame should be cut,
+   */
+  private getRect(): {x: number, y: number, width: number, height: number} {
+    const style = getComputedStyle(this.video);
+    const fit = style.getPropertyValue('object-fit');
+    const vidWidth = this.video.videoWidth;
+    const vidHeight = this.video.videoHeight;
+    const vidRatio = vidWidth / vidHeight;
+    const cltWidth = this.video.clientWidth;
+    const cltHeight = this.video.clientHeight;
+    const cltRatio = cltWidth / cltHeight;
+    const pos = style.getPropertyValue('object-position').split(' ');
+    const horPos = parseInt(pos[0]) / 100;
+    const vrtPos = parseInt(pos[1]) / 100;
+    let width = 0;
+    let height = 0;
+    let x = 0;
+    let y = 0;
+    if (fit === 'none') {
+      width = cltWidth;
+      height = cltHeight;
+      x = (vidWidth - cltWidth) * horPos;
+      y = (vidHeight - cltHeight) * vrtPos;
+    } else if (fit === 'contain' || fit === 'scale-down') {
+      // TODO: handle the 'scale-down' appropriately, once its meaning will be clear
+      width = vidWidth;
+      height = vidHeight;
+    } else if (fit === 'cover') {
+      if (vidRatio > cltRatio) {
+        width = vidHeight * cltRatio;
+        height = vidHeight;
+        x = (vidWidth - width) * horPos;
+      } else {
+        width = vidWidth;
+        height = vidWidth / cltRatio;
+        y = (vidHeight - height) * vrtPos;
+      }
+    } else if (fit === 'fill') {
+      width = vidWidth;
+      height = vidHeight;
+    } else
+      console.error(`Unexpected object-fit attribute with value ${fit} relative to`);
+    return {x, y, width, height};
+  }
+
+  /**
+   * Flip horizontally
+   * 
+   * @param {HTMLCanvasElement} canvas
+   * @return {void}
+   */
+  private flip(canvas: HTMLCanvasElement): void {
+    const ctx = canvas.getContext('2d')!;
+    const data = ctx.getImageData(0,0, canvas.width, canvas.height);
+    // Traverse every row and flip the pixels
+    for (let i=0; i<data.height; i++) {
+     // We only need to do half of every row since we're flipping the halves
+      for (let j=0; j<data.width/2; j++) {
+        const index = (i * 4) * data.width + (j * 4);
+        const mirrorIndex = ((i + 1) * 4) * data.width - ((j + 1) * 4);
+        for (let k=0; k<4; k++) {
+          let tmp = data.data[index + k];
+          data.data[index + k] = data.data[mirrorIndex + k];
+          data.data[mirrorIndex + k] = tmp;
+        }
+      }
+    }
+    ctx.putImageData(data, 0, 0, 0, 0, data.width, data.height);
   }
 }
 

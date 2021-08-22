@@ -4,12 +4,22 @@ import json from 'rollup-plugin-json';
 import commonjs from 'rollup-plugin-commonjs'
 import resolve from 'rollup-plugin-node-resolve';
 import postcss from 'rollup-plugin-postcss';
+import alias from '@rollup/plugin-alias';
+import replace from '@rollup/plugin-replace';
 import pkg from './package.json';
 
 export default {
   // external: Object.keys(pkg['dependencies'] || []),
   input: './src/index.ts',
   plugins: [
+    alias({
+      entries: {handlebars: 'handlebars/dist/handlebars.js'}
+    }),
+    replace({
+      // When you "each" an object in handlebars.js, "global.Symbol" is an undefined error because there is no reference to the "window" object in "global".So replace global with window.
+      include: '**/handlebars.*',
+      values: {'global.Symbol': 'window.Symbol'}
+    }),
     postcss(),
     typescript({
       tsconfigDefaults: { compilerOptions: {} },

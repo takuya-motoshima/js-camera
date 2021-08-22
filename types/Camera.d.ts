@@ -1,6 +1,7 @@
 import './styles/camera.css';
 import { GuiState } from '~/setupGui';
-import Constraints from '~/Constraints';
+import Constraints from '~/interfaces/Constraints';
+import CaptureOptions from '~/interfaces/CaptureOptions';
 declare class Camera extends HTMLElement {
     facing: 'front' | 'back' | undefined;
     guiState: GuiState | undefined;
@@ -21,24 +22,24 @@ declare class Camera extends HTMLElement {
     /**
      * Define elements
      *
-     * @return {this}
+     * @return {Camera}
      */
     static define(): any;
     /**
      * Generate elements
      *
-     * @return {this}
+     * @return {Camera}
      */
     static createElement(): any;
     /**
      * Add event listener
      *
-     * @param  {string}           type
-     * @param  {() => void}       listener
+     * @param  {string}         type
+     * @param  {() => void}     listener
      * @param  {{once: boolen}} options.once
-     * @return {this}
+     * @return {Camera}
      */
-    on(type: string, listener: (event?: Event) => void, options?: {
+    on(type: string, listener: (evt?: Event) => void, options?: {
         once: boolean;
     }): Camera;
     /**
@@ -46,14 +47,14 @@ declare class Camera extends HTMLElement {
      *
      * @param  {string}     type
      * @param  {() => void} listener
-     * @return {this}
+     * @return {Camera}
      */
-    off(type: string, listener: (event?: Event) => void): Camera;
+    off(type: string, listener: (evt?: Event) => void): Camera;
     /**
      * Call event listener
      *
      * @param  {string} type
-     * @param  {Object}     detail
+     * @param  {Object} detail
      * @return {void}
      */
     private invoke;
@@ -106,26 +107,18 @@ declare class Camera extends HTMLElement {
      * Return video size
      *
      * @return {{width:number,height:number}}
-     * [getVideoSize description]
      */
     get resolution(): {
         width: number;
         height: number;
     };
     /**
-     * Capture a single frame
+     * Returns the Data URL of the captured image.
      *
-     * @param  {number} width
-     * @param  {number} height
-     * @param  {{width?: number, height?: number, fit?: 'cover'|'contain'|'fill', format?: 'image/webp'|'image/png'|'image/jpeg'}} options
-     * @return {string}
+     * @param  {CaptureOptions} options
+     * @return {string}         Data URL of the captured image.
      */
-    capture(options?: {
-        width?: number;
-        height?: number;
-        fit?: 'cover' | 'contain' | 'fill';
-        format?: 'image/webp' | 'image/png' | 'image/jpeg';
-    }): string;
+    capture(options?: CaptureOptions): string;
     /**
      * Returns the permission status of the requested feature, either granted, denied or - in case the user was not yet asked - prompt.
      *
@@ -137,7 +130,6 @@ declare class Camera extends HTMLElement {
     permission(): Promise<string | undefined>;
     /**
      * Revoke camera access settings
-     *
      * typescript doesn't support "navigator.permissions.revoke", so don't use it now
      *
      * @return {Promise<void>}
@@ -150,22 +142,39 @@ declare class Camera extends HTMLElement {
      */
     private get tracks();
     /**
-     * Add camera controller
+     * Set controller
      *
      * @return {void}
      */
-    private addCameraControl;
+    private setControl;
     /**
-     * Add camera menu
+     * Set menu
      *
      * @return {void}
      */
-    private addCameraMenu;
+    private setMenu;
     /**
-     * Add GUI
+     * Set GUI.
      *
      * @return {void}
      */
-    private addGui;
+    private setGui;
+    /**
+     * Returns the display dimensions and position of the video element
+     *
+     * @return {{x: number, y: number, width: number, height: number}} rect Display size and position of video element
+     *                 x     : The horizontal position of the left-top point where the sourceFrame should be cut,
+     *                 y     : The vertical position of the left-top point where the sourceFrame should be cut,
+     *                 width : How much horizontal space of the sourceFrame should be cut,
+     *                 height: How much vertical space of the sourceFrame should be cut,
+     */
+    private getRect;
+    /**
+     * Flip horizontally
+     *
+     * @param {HTMLCanvasElement} canvas
+     * @return {void}
+     */
+    private flip;
 }
 export default Camera;

@@ -1,5 +1,4 @@
 export default class {
-
   private readonly video: HTMLVideoElement;
 
   /**
@@ -37,7 +36,8 @@ export default class {
    */
   public close(): void {
     if (!this.video.srcObject) return;
-    for (let track of (<MediaStream>this.video.srcObject).getTracks()) track.stop();
+    for (let track of (<MediaStream>this.video.srcObject).getTracks())
+      track.stop();
     this.video.srcObject = null;
   }
 

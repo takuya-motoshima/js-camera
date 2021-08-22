@@ -149,19 +149,47 @@ See the [js-scissor API](https://www.npmjs.com/package/js-scissor) for how to us
 ###### Syntax
 ```js
 camera.capture(option?: {
+  /**
+   * Resize width (px). The default is no resizing (undefined).
+   * @type {number}
+   */
   width?: number,
+
+  /**
+   * Resize height (px). The default is no resizing (undefined).
+   * @type {number}
+   */
   height?: number,
+
+  /**
+   * This is the position to crop. The default is no crop (undefined).
+   * @type {{x: number, y: number, width: number, height: number}}
+   */
+  extract?: {x: number, y: number, width: number, height: number},
+
+  /**
+   * Fit mode.
+   * @type {number}
+   */
   fit?: 'cover'|'contain'|'fill',
+
+  /**
+   * MIME type of the captured image.
+   * @type {number}
+   */
   format?: 'image/webp'|'image/png'|'image/jpeg'
 }): string
 ```
 
 ###### Parameters
 - __width__: number|undefined  
-    Specify the width when resizing the captured image.
+    Resize width (px). The default is no resizing (undefined).
 
 - __height__: number|undefined  
     Specify the height when resizing the captured image.
+
+- __extract__: {x: number, y: number, width: number, height: number}  
+    This is the position to crop. The default is no crop (undefined).
 
 - __fit__: 'cover'|'contain'|'fill'|undefined  
     How the image should be resized to fit both provided dimensions, one of cover, contain, fill. (optional, default 'fill')

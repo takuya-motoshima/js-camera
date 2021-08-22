@@ -50,6 +50,8 @@
   },
   "homepage": "https://github.com/takuya-motoshima/js-camera#readme",
   "devDependencies": {
+    "@rollup/plugin-alias": "^3.1.5",
+    "@rollup/plugin-replace": "^3.0.0",
     "@types/jest": "^24.0.23",
     "fetch-mock": "^8.0.0",
     "jest": "^24.9.0",
@@ -68,7 +70,7 @@
   "dependencies": {
     "@types/dat.gui": "^0.7.5",
     "dat.gui": "^0.7.7",
-    "js-scissor": "^1.0.0",
-    "js-shared": "^1.0.2"
+    "handlebars": "^4.7.7",
+    "js-scissor": "^1.0.0"
   }
 }
