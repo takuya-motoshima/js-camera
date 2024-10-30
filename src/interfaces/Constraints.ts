@@ -1,8 +1,21 @@
-export default interface {
+/**
+ * Interface of constraints when opening the camera.
+ */
+export default interface Constraints {
+ /**
+  * Camera face, actual size.
+  * @type {{facingMode: 'user'|'environment', width?: number|{ideal: number}, height?: number|{ideal: number}}}
+  */
   video: {
-    facingMode: 'user'|'environment',
+    facingMode?: 'user'|'environment',
     width?: number|{ideal: number},
-    height?: number|{ideal: number}
+    height?: number|{ideal: number},
+    deviceId?: string|{exact: string},
   },
-  audio: boolean
+
+ /**
+  * Sound. Default is disabled (false).
+  * @type {{facingMode: 'user'|'environment', width?: number|{ideal: number}, height?: number|{ideal: number}}}
+  */
+  audio: boolean,
 }

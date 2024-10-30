@@ -1,32 +1,19 @@
 # js-camera
-
 This is a custom element V1-based camera component.
 
 ## Installation
-
 ```sh
 npm install js-camera;
 ```
 
 ## API
-
 [API Documentation](./API.md)
 
-## Changelog
-
-[Changelog](./CHANGELOG.md)
-
-## Examples
-
-There are some examples in "./examples" in this package.Here is the first one to get you started.
-
 ## Usage
-
 ### Use Camera Controls
-
 You can use play, pause, capture and camera face switch immediately by using "controls" attribute on camera element.
 
-![camera-with-controller.jpg](https://raw.githubusercontent.com/takuya-motoshima/js-camera/master/screencap/camera-with-controller.jpg)
+![camera-with-controller.jpg](screencaps/camera-with-controller.jpg)
 
 Add "controls" and "autoplay" attributes to the camera element.  
 If necessary, specify the camera face with the "facing" attribute and the resolution with the "width" and "height" attributes.  
@@ -45,7 +32,7 @@ import 'js-camera';
 // Camera element
 const camera = document.querySelector('#camera');
 
-// If you use the "autoplay" attribute to automatically open the camera, you can wait for the camera to fully open if necessary.
+// If you use the "autoplay" attribute to automatically open camera, you can wait for the camera to fully open if necessary.
 await camera.waitOpen();
 
 // Camera event listener
@@ -57,17 +44,16 @@ camera
   // Called after pausing the camera
   .on('paused', () => {})
   // Returns the photo taken from the shoot button on the camera controller
-  // The captured image can be received from "event.detail.dat" in base64 format.
-  .on('tookphoto', evt => {
-    console.log(evt.detail.base64.slice(0, 30));// data:image/png;base64,iVB...
+  // The captured image can be received from "event.detail.dat" in data URL.
+  .on('captured', event => {
+    console.log(event.detail.capture.slice(0, 30));
   });
 ```
 
 ### Try camera options
-
 If you want to experiment with different camera options, you can use "dat-gui" for the camera element and use the options menu.
 
-![camera-with-controller.jpg](https://raw.githubusercontent.com/takuya-motoshima/js-camera/master/screencap/camera-with-gui.jpg)
+![camera-with-controller.jpg](screencaps/camera-with-gui.jpg)
 
 The current GUI options can be accessed from the camera element "guiState".  
 Here is an example using the GUI option.
@@ -101,11 +87,8 @@ if (camera.guiState.resize) {
   options.height = camera.guiState.height;
   options.fit = camera.guiState.fit;
 }
-const base64 = camera.capture(options);
-console.log(base64);// data:image/png;base64,iVB...
-
-// Pause
-camera.pause();
+const capture = camera.capture(options);
+console.log(capture);
 
 // Pause
 camera.pause();
@@ -115,7 +98,6 @@ camera.play();
 ```
 
 ### Basic camera usage.
-
 Place the camera open/close, play, pause, and capture buttons in the HTML.
 
 ```html
@@ -134,11 +116,11 @@ Place the camera open/close, play, pause, and capture buttons in the HTML.
 <js-camera id="camera"></js-camera>
 
 <div class="actions">
-  <button id="btnOpen" type="button">Open</button>
-  <button id="btnClose" type="button">Close</button>
-  <button id="btnPause" type="button">Pause</button>
-  <button id="btnPlay" type="button">Play</button>
-  <button id="btnCapture" type="button">Take photo</button>
+  <button id="openButton" type="button">Open</button>
+  <button id="closeButton" type="button">Close</button>
+  <button id="pauseButton" type="button">Pause</button>
+  <button id="playButton" type="button">Play</button>
+  <button id="captureButton" type="button">Capture</button>
 </div>
 ```
 
@@ -151,56 +133,65 @@ import 'js-camera';
 // Camera element
 const camera = document.querySelector('#camera');
 
-// Open the camera.
+// Open camera.
 // If necessary, you can also specify the resolution like "await camera.open('back', 1920, 1080)".
-document.querySelector('#btnOpen').addEventListener('click', async () => {
+document.querySelector('#openButton').addEventListener('click', async () => {
   await camera.open('back');
 });
 
-// Close the camera.
-document.querySelector('#btnClose').addEventListener('click', () => {
+// Close  camera.
+document.querySelector('#closeButton').addEventListener('click', () => {
   if (!camera.opened)
     return;
   camera.close();
 });
 
 // Pause
-document.querySelector('#btnPause').addEventListener('click', () => {
+document.querySelector('#pauseButton').addEventListener('click', () => {
   if (!camera.opened)
     return;
   camera.pause();
 });
 
 // Play camera
-document.querySelector('#btnPlay').addEventListener('click', () => {
+document.querySelector('#playButton').addEventListener('click', () => {
   if (!camera.opened)
     return;
   camera.play();
 });
 
 // Take a photo
-document.querySelector('#btnCapture').addEventListener('click', () => {
+document.querySelector('#captureButton').addEventListener('click', () => {
   if (!camera.opened)
     return;
-  // Get the photo data taken
-  let base64 = camera.capture();
-  console.log(`Capture: ${base64}`);// Capture: data:image/png;base64,iVBORw0K
+  // Get capture data URL.
+  let capture = camera.capture();
+  console.log(`Capture: ${capture}`);// Capture: data:image/png;base64,iVBORw0K
 
   // You can specify image/webp, image/png, image/jpeg as the capture format.
   // Default is image/png.
-  base64 = camera.capture({format: 'image/webp'});
-  console.log(`WebP capture: ${base64}`);// WebP capture: data:image/webp;base64,UklGRrb
+  capture = camera.capture({format: 'image/webp'});
+  console.log(`WebP capture: ${capture}`);// WebP capture: data:image/webp;base64,UklGRrb
 
   // You can also resize the capture with width, height, and fit options.
-  base64 = camera.capture({
+  capture = camera.capture({
     fit: 'cover',
     width: 300,
     height: 200
   });
-  console.log(`Resize capture: ${base64}`);// Resize capture: data:image/png;base64,iVBORw0K
+  console.log(`Resize capture: ${capture}`);// Resize capture: data:image/png;base64,iVBORw0K
 });
 ```
 
-## License
+## Release Notes
+All changes can be found [here](CHANGELOG.md).
 
-[MIT licensed](./LICENSE.txt)
+## Author
+**Takuya Motoshima**
+
+* [github/takuya-motoshima](https://github.com/takuya-motoshima)
+* [twitter/TakuyaMotoshima](https://twitter.com/TakuyaMotoshima)
+* [facebook/takuya.motoshima.7](https://www.facebook.com/takuya.motoshima.7)
+
+## License
+[MIT](LICENSE)

@@ -1,34 +1,35 @@
 /**
- * Camera capture options.
+ * Capture Option Interface.
  */
-export default interface {
+export default interface CaptureOptions {
   /**
-   * Resize width (px). The default is no resizing (undefined).
+   * Resize width (px). No default (undefined).
    * @type {number}
    */
   width?: number,
 
   /**
-   * Resize height (px). The default is no resizing (undefined).
+   * Resize height (px). No default (undefined).
    * @type {number}
    */
   height?: number,
 
   /**
-   * This is the position to crop. The default is no crop (undefined).
+   * Position to crop. No default (undefined).
    * @type {{x: number, y: number, width: number, height: number}}
    */
   extract?: {x: number, y: number, width: number, height: number},
 
   /**
-   * Fit mode.
-   * @type {number}
+   * Resize Fit Mode. Default is 'fill'.
+   * @type {'cover'|'contain'|'fill'}
    */
   fit?: 'cover'|'contain'|'fill',
 
   /**
-   * MIME type of the captured image.
-   * @type {number}
+   * MIME Type. Default is 'image/png'.
+   * @type {string}
    */
-  format?: 'image/webp'|'image/png'|'image/jpeg'
+  format?: string,
+  // format?: 'image/webp'|'image/png'|'image/jpeg'
 }

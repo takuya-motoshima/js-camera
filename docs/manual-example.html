@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Manual camera operation example - js-camera</title>
+  <style>
+    body {
+      display: flex;
+      margin: 0;
+      flex-direction: column;
+      background-image: linear-gradient(rgba(255, 255, 255, 0.01), rgb(255, 255, 255) 85%), radial-gradient(at left top, rgba(13, 110, 253, 0.5), rgba(0, 0, 0, 0) 50%), radial-gradient(at right top, rgba(255, 228, 132, 0.5), rgba(0, 0, 0, 0) 50%), radial-gradient(at right center, rgba(113, 44, 249, 0.5), rgba(0, 0, 0, 0) 50%), radial-gradient(at left center, rgba(214, 51, 132, 0.5), rgba(0, 0, 0, 0) 50%);
+    }
+
+    header h1 {
+      font-size: 1rem;
+      font-weight: 400;
+      padding-left: 20px !important;
+      padding-right: 20px !important;
+    }
+
+    .camera {
+      flex: 1;
+    }
+
+    .actions {
+      padding: .75rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: .25em;
+    }
+    
+      button, select {
+        /* font-weight: 600; */
+        padding: 6px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+
+      button:disabled {
+        cursor: default;
+      }
+
+    .resolution {
+      position: absolute;
+      top: 45.42499923706055px;
+      right: 0;
+      z-index: 1002;
+      background-color: hsl(0deg 0% 100% / 50%);
+      padding-bottom: 4.2px;
+      padding-left: 7.8px;
+      padding-right: 7.8px;
+      padding-top: 4.2px;
+      font-size: 12px;
+      border-radius: 0.375rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Manual camera operation example</h1>
+  </header>
+  <js-camera --controls --autoplay facing="front" class="camera" id="camera"></js-camera>
+  <div class="actions">
+    <button type="button" id="openButton">Open camera</button>
+    <select id="facingModeSelect">
+      <option value="front" selected>Use front camera</option>
+      <option value="back">Use back camera.</option>
+    </select>
+    <button type="button" id="closeButton" disabled>Close camera</button>
+    <button type="button" id="playButton" disabled>Play camera</button>
+    <button type="button" id="pauseButton" disabled>Pause camera</button>
+    <button type="button" id="captureButton" disabled>Capture</button>
+    <select id="deviceSelect"></select>
+  </div>
+  <div class="resolution" id="resolution">0x0</div>
+  <script type="module">
+    import '../dist/build.esm.js';
+
+    const cameraEl = document.getElementById('camera');
+    const facingModeSelectEl = document.getElementById('facingModeSelect');
+    const openButtonEl = document.getElementById('openButton');
+    const closeButtonEl = document.getElementById('closeButton');
+    const playButtonEl = document.getElementById('playButton');
+    const pauseButtonEl = document.getElementById('pauseButton');
+    const captureButtonEl = document.getElementById('captureButton');
+    const deviceSelectEl = document.getElementById('deviceSelect');
+    const resolutionEl = document.getElementById('resolution');
+
+    // Set camera open event.
+    cameraEl.addEventListener('opened', () => {
+      // Show resolution.
+      const {width, height} = cameraEl.resolution;
+      resolutionEl.textContent = `${width}x${height}`;
+    });
+
+    // Open camera. If necessary, you can also specify the resolution as in “await camera.open(back, 1920, 1080)”.
+    openButtonEl.addEventListener('click', async () => {
+      try {
+        // Open camera.
+        await cameraEl.open({facingMode: facingModeSelectEl.value});
+
+        // Button controls.
+        openButtonEl.disabled = true;
+        closeButtonEl.disabled = false;
+        pauseButtonEl.disabled = false;
+        captureButtonEl.disabled = false;
+      } catch (err) {
+        alert(err);
+      }
+    });
+
+    // Close camera.
+    closeButtonEl.addEventListener('click', () => {
+      // Close Camera.
+      cameraEl.close();
+
+      // Button controls.
+      openButtonEl.disabled = false;
+      closeButtonEl.disabled = true;
+      playButtonEl.disabled = true;
+      pauseButtonEl.disabled = true;
+      captureButtonEl.disabled = true;
+    });
+
+    // Pause the camera.
+    pauseButtonEl.addEventListener('click', () => {
+      // Pause camera.
+      cameraEl.pause();
+
+      // Button controls.
+      pauseButtonEl.disabled = true;
+      playButtonEl.disabled = false;
+    });
+
+    // Play camera.
+    playButtonEl.addEventListener('click', () => {
+      // Play Camera.
+      cameraEl.play();
+
+      // Button controls.
+      playButtonEl.disabled = true;
+      pauseButtonEl.disabled = false;
+    });
+
+    // Take a capture.
+    captureButtonEl.addEventListener('click', () => {
+      // Get capture data URL.
+      const capture = cameraEl.capture();
+      // const capture = cameraEl.capture({fit: 'cover', width: 300, height: 200});
+
+      // Download the capture as an image.
+      const link = document.createElement('a');
+      link.href = capture;
+      link.download = 'capture.png';
+      link.click();
+    });
+
+    // Get available camera devices and set them as options.
+    cameraEl.getAvailableDevices().then(devices => {
+      console.log('devices=', JSON.stringify(devices, null, 2));
+      alert(`devices=${JSON.stringify(devices, null, 2)}`);
+      if (devices.length > 0) {
+        for (let device of devices) {
+          const optionEl = document.createElement('option');
+          optionEl.value = device.deviceId;
+          optionEl.textContent = device.label;
+          deviceSelectEl.appendChild(optionEl);
+        }
+      } else {
+        const optionEl = document.createElement('option');
+        optionEl.textContent = 'No devices available';
+        deviceSelectEl.appendChild(optionEl);
+        deviceSelectEl.disabled = true;
+      }
+    });
+  </script>
+</body>
+</html>

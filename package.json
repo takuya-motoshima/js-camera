@@ -2,31 +2,30 @@
   "name": "js-camera",
   "version": "1.0.2",
   "description": "This is a custom element V1-based camera component.",
+  "type": "module",
   "main": "dist/build.common.js",
   "module": "dist/build.esm.js",
   "browser": "dist/build.js",
   "types": "types/index.d.ts",
   "scripts": {
-    "watch": "rollup -c --watch",
-    "prewatch": "rm -rf dist types",
-    "build": "rollup -c",
+    "build": "rollup -c rollup.config.js",
+    "watch": "rollup -c rollup.config.js --watch",
     "prebuild": "rm -rf dist types",
-    "test": "jest",
-    "start": "ts-node -r tsconfig-paths/register -P tsconfig.json -O '{\"module\":\"commonjs\"}' -e \"import * as index from '~/index';console.log(index);\""
+    "prewatch": "rm -rf dist types"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/takuya-motoshima/js-camera.git"
   },
   "files": [
-    "dist/*.js",
-    "types/*.d.ts",
-    "package.json",
-    "README.md",
+    "dist/",
+    "types/",
     "API.md",
     "CHANGELOG.md",
-    "examples",
-    "screencap"
+    "LICENSE",
+    "package.json",
+    "README.md",
+    "screencaps/"
   ],
   "keywords": [
     "browser",
@@ -49,28 +48,21 @@
     "email": "developer.takuyamotoshima@gmail.com"
   },
   "homepage": "https://github.com/takuya-motoshima/js-camera#readme",
-  "devDependencies": {
-    "@rollup/plugin-alias": "^3.1.5",
-    "@rollup/plugin-replace": "^3.0.0",
-    "@types/jest": "^24.0.23",
-    "fetch-mock": "^8.0.0",
-    "jest": "^24.9.0",
-    "rollup": "^1.27.2",
-    "rollup-plugin-commonjs": "^10.1.0",
-    "rollup-plugin-json": "^4.0.0",
-    "rollup-plugin-node-resolve": "^5.2.0",
-    "rollup-plugin-postcss": "^2.2.0",
-    "rollup-plugin-terser": "^5.1.2",
-    "rollup-plugin-typescript2": "^0.25.2",
-    "ts-jest": "^24.1.0",
-    "ts-node": "^8.5.2",
-    "tsconfig-paths": "^3.9.0",
-    "typescript": "^3.8.3"
-  },
   "dependencies": {
-    "@types/dat.gui": "^0.7.5",
-    "dat.gui": "^0.7.7",
-    "handlebars": "^4.7.7",
-    "js-scissor": "^1.0.0"
+    "dat.gui": "^0.7.9",
+    "handlebars": "^4.7.8"
+  },
+  "devDependencies": {
+    "@rollup/plugin-alias": "^5.1.0",
+    "@rollup/plugin-commonjs": "^26.0.1",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-replace": "^5.0.7",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@types/dat.gui": "^0.7.13",
+    "rollup": "^4.21.3",
+    "rollup-plugin-postcss": "^4.0.2",
+    "rollup-plugin-typescript2": "^0.36.0",
+    "typescript": "^5.6.2"
   }
 }

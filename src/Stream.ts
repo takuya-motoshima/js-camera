@@ -1,44 +1,54 @@
+/**
+ * Camera stream class.
+ */
 export default class {
-  private readonly video: HTMLVideoElement;
+  /**
+   * Video element.
+   * @type {HTMLVideoElement}
+   */
+  #video: HTMLVideoElement;
 
   /**
-   * @param  {HTMLVideoElement} video
+   * Initialize the camera stream.
+   * @param  {HTMLVideoElement} video Video element.
    * @return {void}
    */
   constructor(video: HTMLVideoElement) {
-    this.video = video;
+    this.#video = video;
   }
 
   /**
-   * Open stream
-   * 
-   * @param  {Object} constraints
-   * @return {void}
+   * Open camera stream.
+   * @param {MediaStreamConstraints} constraints Camera constraints.
+   * @return {Promise<MediaTrackSettings>} Camera device information.
    */
-  public async open(constraints: Object): Promise<void> {
-    await new Promise(async (resolve, reject) => {
+  async open(constraints: MediaStreamConstraints): Promise<MediaTrackSettings> {
+    return new Promise<MediaTrackSettings>(async (resolve, reject) => {
       try {
         this.close();
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        this.video.srcObject = stream;
-        this.video.addEventListener('loadedmetadata', () => resolve(), {once: true});
-        this.video.addEventListener('error', () => reject(this.video.error), {once: true});
-      } catch (e) {
-        reject(e);
+        this.#video.srcObject = stream;
+
+        // Get camera device information.
+        const track = stream.getVideoTracks()[0];
+        this.#video.addEventListener('loadedmetadata', () => {
+          resolve(track.getSettings());
+        }, {once: true});
+        this.#video.addEventListener('error', () => {
+          reject(this.#video.error);
+        }, {once: true});
+      } catch (err) {
+        reject(err);
       }
     });
   }
 
   /**
-   * Close stream
-   * 
+   * Closing the camera stream.
    * @return {void}
    */
-  public close(): void {
-    if (!this.video.srcObject) return;
-    for (let track of (<MediaStream>this.video.srcObject).getTracks())
-      track.stop();
-    this.video.srcObject = null;
+  close(): void {
+    (<MediaStream>this.#video.srcObject)?.getTracks().forEach(track => track.stop());
+    this.#video.srcObject = null;
   }
-
 }

@@ -4,7 +4,7 @@ import '../dist/build.esm.js';
   // Camera element
   const camera = document.querySelector('#camera');
 
-  // If you use the "autoplay" attribute to automatically open the camera, you can wait for the camera to fully open if necessary.
+  // If you use the "autoplay" attribute to automatically open camera, you can wait for the camera to fully open if necessary.
   await camera.waitOpen();
 
   // Camera event listener
@@ -21,9 +21,9 @@ import '../dist/build.esm.js';
       // Called after pausing the camera
       console.log('Camera paused');
     })
-    .on('tookphoto', evt => {
+    .on('captured', event => {
       // Returns the photo taken from the shoot button on the camera controller
-      // The captured image can be received from "event.detail.dat" in base64 format.
-      console.log(`Capture: ${evt.detail.base64.slice(0, 30)}`);// Capture: data:image/png;base64,iVB...
+      // The captured image can be received from "event.detail.dat" in data URL.
+      console.log(`Capture: ${event.detail.capture.slice(0, 30)}`);// Capture: data:image/png;base64,iVB...
     });
 })();

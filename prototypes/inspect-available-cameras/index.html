@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Inspect available cameras</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.min.css" rel="stylesheet">
+  <!-- <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-coy.min.css" rel="stylesheet"> -->
+  <!-- <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-twilight.min.css" rel="stylesheet"> -->
+  <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" rel="stylesheet">
+  <!-- <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"> -->
+  <link rel="stylesheet" href="style.css?ver=1727422131803">
+</head>
+<body>
+  <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+    <symbol id="check-circle-fill" viewBox="0 0 16 16">
+      <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"></path>
+    </symbol>
+    <symbol id="info-fill" viewBox="0 0 16 16">
+      <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"></path>
+    </symbol>
+    <symbol id="exclamation-triangle-fill" viewBox="0 0 16 16">
+      <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"></path>
+    </symbol>
+  </svg>
+  <div class="container my-4">
+    <h1>Inspect available cameras</h1>
+    <h5>Try available camera</h5>
+    <div class="alert alert-danger d-flex align-items-center d-none" role="alert">
+      <svg class="bi flex-shrink-0 me-2" role="img" aria-label="Danger:"><use xlink:href="#exclamation-triangle-fill"></use></svg>
+      <div id="alertMessage"></div>
+    </div>
+    <p>Runs the selected camera. The selection is limited to cameras whose capabilities obtained with <code>MediaDeviceInfo.getCapabilities API</code> include a front or rear camera.</p>
+    <form class="row gy-2 gx-3 align-items-center mb-3">
+      <div class="col-auto">
+        <label class="visually-hidden" for="autoSizingSelect">Preference</label>
+        <select class="form-select form-select-sm" id="deviceSelect" style="min-width: 300px;"></select>
+      </div>
+      <div class="col-auto">
+        <button type="button" class="btn btn-sm" id="openButton">Open camera</button>
+      </div>
+      <div class="col-auto">
+        <button type="button" class="btn btn-sm" id="closeButton" disabled>Close camera</button>
+      </div>
+    </form>
+    <div class="mb-3">
+      <p class="mb-0">Camera:</p>
+      <video autoplay playsinline class="video mb-3" id="video"></video>
+    </div>
+    <div class="mb-3">
+      <p class="mb-0">JS:</p>
+      <p>Get devices that can be used as cameras as follows.</p>
+      <div class="alert alert-warning d-flex align-items-center" role="alert">
+        <svg class="bi flex-shrink-0 me-2" role="img" aria-label="Info:"><use xlink:href="#info-fill"></use></svg>
+        <div>The key is to access the media device first to enumerate devices and finally to release the MediaStream.</div>
+      </div>
+      <pre><code class="language-js">const getAvailableCameraDevices = async () =&gt; {
+  let stream;
+  try {
+    // Camera device enumeration requires permission to access media devices. Access camera devices without enforcing camera face.
+    stream = await navigator.mediaDevices.getUserMedia({video: {facingMode: {ideal: 'user'}}, audio: false});
+
+    // Get only camera devices with front or rear cameras.
+    return (await navigator.mediaDevices.enumerateDevices())
+      // .filter(device =&gt; device.kind === 'videoinput')
+      .filter(device =&gt; {
+        if (device.kind !== 'videoinput')
+          // Excluded if not a video input device.
+          return false;
+
+        // Checks if there is a front (user) or rear (environment) camera in the camera face (facingMode).
+        const capability = device.getCapabilities();
+        return ['user', 'environment'].some(facingMode =&gt; capability.facingMode.includes(facingMode));
+      });
+  } finally {
+    // Note that certain browsers will generate a `NotReadableError: could not start video source` when opening the camera if MediaStream is not released.
+    stream?.getTracks().forEach(track =&gt; track.stop());
+  }
+}</code></pre>
+    </div>
+    <!-- <div class="mb-3">
+      <p class="mb-0">Device Information:</p>
+      <div class="table-responsive">
+        <table class="table table-sm">
+          <tbody>
+            <tr>
+              <th class="text-end">label:</th>
+              <td class="w-100" id="label">-</td>
+            </tr>
+            </tr>
+              <th class="text-end">facingMode:</th>
+              <td class="w-100" id="facingMode">-</td>
+            </tr>
+            </tr>
+              <th class="text-end">width:</th>
+              <td class="w-100" id="width">-</td>
+            </tr>
+            </tr>
+              <th class="text-end">height:</th>
+              <td class="w-100" id="height">-</td>
+            </tr>
+            </tr>
+              <th class="text-end">aspectRatio:</th>
+              <td class="w-100" id="aspectRatio">-</td>
+            </tr>
+            </tr>
+              <th class="text-end">frameRate:</th>
+              <td class="w-100" id="frameRate">-</td>
+            </tr>
+            </tr>
+              <th class="text-end">resizeMode:</th>
+              <td class="w-100" id="resizeMode">-</td>
+            </tr> 
+          </tbody>
+        </table>
+      </div>
+    </div> -->
+    <h5 class="mt-4">All device information</h5>
+    <div class="table-responsive">
+      <table class="table table-sm" id="devicesTable">
+        <thead>
+          <tr>
+            <th>label</th>
+            <th>facingMode</th>
+            <th>width</th>
+            <th>height</th>
+            <th>aspectRatio</th>
+            <th>frameRate</th>
+            <th>resizeMode</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+  <script src="script.js?ver=1727422131803"></script>
+</body>
+</html>

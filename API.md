@@ -1,28 +1,28 @@
 # Camera element
 
 ## Attributes
-- __controls__  
+- controls  
 The control is displayed.
 
-- __autoplay__  
+- autoplay  
 Open camera automatically
 
-- __facing__  
+- facing  
 This is the camera face when opening the camera automatically.  
 Specify "front" for the front camera and "back" for the back camera.  
 The default is "back".
 
-- __width__  
+- width  
 The width of the camera resolution.
 
-- __height__  
+- height  
 The height of the camera resolution.
 
-- __dat-gui__  
+- dat-gui  
 The GUI option menu is displayed.
 
 ## Properties
-- __state__: string  
+- state: string  
     Returns the camera status.
     <table>
         <tr>
@@ -39,13 +39,13 @@ The GUI option menu is displayed.
         </tr>
     </table>
 
-- __opened__: boolean  
+- opened: boolean  
 Returns true if the camera is open.
 
-- __paused__: boolean  
+- paused: boolean  
 Returns true if the camera is paused.
 
-- __facing__: string  
+- facingMode: string  
 Returns the open camera face.  
 <table>
     <tr>
@@ -62,29 +62,25 @@ Returns the open camera face.
     </tr>
 </table>
 
-- __guiState__: GuiState  
+- guiState: GuiState  
 If using dat-gui for the camera element, returns the GUI options that have been applied.  
 This object inherits the GuiState interface.
 
-- __constraints__: Constraints  
-Returns the constraints applied when the camera was opened.  
-It inherits the Constraints interface.
-
-- __resolution__: { width: number, height: number }  
+- resolution: { width: number, height: number }  
 Returns the camera resolution.
 
 ## Methods
 
 ### open()
-Open the camera.
+Open camera.
 
 ###### Syntax
 ```js
-camera.open(facing: 'front'|'back' = 'back', width?: number, height?: number): Promise<void>
+camera.open(facingMode: 'front'|'back' = 'back', width?: number, height?: number): Promise<void>
 ```
 
 ###### Parameters
-- __facing__: string  
+- facingMode: string  
     Camera face.
     <table>
         <tr>
@@ -97,10 +93,10 @@ camera.open(facing: 'front'|'back' = 'back', width?: number, height?: number): P
         </tr>
     </table>
 
-- __width__: number|undefined  
+- width: number|undefined  
     Width of resolution. The default is the initial value of the terminal.
 
-- __height__: number|undefined  
+- height: number|undefined  
     Height of resolution. The default is the initial value of the terminal.
 
 ###### Return
@@ -118,7 +114,7 @@ camera.waitOpen(): Promise<void>
 Return promise.
 
 ### close()  
-Close the camera.
+Close  camera.
 
 ###### Syntax
 ```js
@@ -142,9 +138,7 @@ camera.play(): void
 ```
 
 ### capture()
-Returns the current frame image in base64 format.  
-The resizing of the captured image uses the js-scissor library.  
-See the [js-scissor API](https://www.npmjs.com/package/js-scissor) for how to use the fit option.  
+Returns the current frame image in data URL.  
 
 ###### Syntax
 ```js
@@ -182,16 +176,16 @@ camera.capture(option?: {
 ```
 
 ###### Parameters
-- __width__: number|undefined  
+- width: number|undefined  
     Resize width (px). The default is no resizing (undefined).
 
-- __height__: number|undefined  
+- height: number|undefined  
     Specify the height when resizing the captured image.
 
-- __extract__: {x: number, y: number, width: number, height: number}  
+- extract: {x: number, y: number, width: number, height: number}  
     This is the position to crop. The default is no crop (undefined).
 
-- __fit__: 'cover'|'contain'|'fill'|undefined  
+- fit: 'cover'|'contain'|'fill'|undefined  
     How the image should be resized to fit both provided dimensions, one of cover, contain, fill. (optional, default 'fill')
     <table>
         <tr>
@@ -208,7 +202,7 @@ camera.capture(option?: {
         </tr>
     </table>
 
-- __format__: 'image/webp'|'image/png'|'image/jpeg'|undefined  
+- format: 'image/webp'|'image/png'|'image/jpeg'|undefined  
     Capture image format.The default is "image/png".
     <table>
         <tr>
@@ -226,14 +220,14 @@ camera.capture(option?: {
     </table>
 
 ###### Return
-Returns the captured image as a string in base64 format.
+Returns the captured image as a string in data URL.
 
-### permission()
+### getPermission()
 Returns the camera permissions.
 
 ###### Syntax
 ```js
-camera.permission(): Promise<string|undefined>
+camera.getPermission(): Promise<string|undefined>
 ```
 ###### Return
 Returns a promise that accepts a string with permission status.
@@ -280,13 +274,13 @@ camera.on(
 ```
 
 ###### Parameters
-- __type__: string  
+- type: string  
     event name.
 
-- __listener__: (event?: Event) => void  
+- listener: (event?: Event) => void  
     Event listener callback function.
 
-- __option__: { once: boolean } = { once: false }
+- option: { once: boolean } = { once: false }
     Event option. The following values ​​can be set.  
     <table>
         <tr>
@@ -335,15 +329,13 @@ Fired when the camera pauses.
 camera.on('paused', event => {});
 ```
 
-### tookphoto
+### captured
 Fired when you take a picture.  
 This is used to attach a control attribute to the camera element and receive shooting data when the shooting button is pressed.
 
 ```js
-// Returns the photo taken from the shoot button on the camera controller
-// The captured image can be received from "event.detail.dat" in base64 format.
-camera.on('tookphoto', event => {
-  console.log(event.detail.base64);// data:image/png;base64,iVB...
+camera.on('captured', event => {
+  console.log(event.detail.capture);// data:image/png;base64,iVB...
 });
 ```
 
@@ -352,9 +344,9 @@ camera.on('tookphoto', event => {
 Interface for constraint objects used when opening a camera
 
 ## Properties
-- __video__: Object
+- video: Object
 
-    - __facingMode__: string  
+    - facingMode: string  
         Camera face.  
         <table>
             <tr>
@@ -367,13 +359,13 @@ Interface for constraint objects used when opening a camera
             </tr>
         </table>
 
-    - __width__: number|undefined  
+    - width: number|undefined  
         Camera resolution width.
 
-    - __height__: number|undefined  
+    - height: number|undefined  
         Camera resolution height.
 
-- __audio__: boolean  
+- audio: boolean  
     Use audio if true.
 
 # GuiState interface
@@ -381,10 +373,10 @@ Interface for constraint objects used when opening a camera
 Interface for GUI option objects of camera elements.
 
 ## Properties
-- __resolution__: string  
+- resolution: string  
     Returns the width and height of the resolution, separated by commas.
 
-- __facing__: string
+- facingMode: string
     Camera face.
     <table>
         <tr>
@@ -397,7 +389,7 @@ Interface for GUI option objects of camera elements.
         </tr>
     </table>
 
-- __format__: string  
+- format: string  
     Format of photos to take.
     <table>
         <tr>
@@ -414,16 +406,16 @@ Interface for GUI option objects of camera elements.
         </tr>
     </table>
 
-- __resize__: boolean  
+- resize: boolean  
     Returns true to resize the photo taken.
 
-- __width__: number  
+- width: number  
     The height to resize the picture taken.
 
-- __height__: number  
+- height: number  
     The width to resize the picture taken.
 
-- __fit__: string  
+- fit: string  
     It is a fitting method when resizing the taken picture.
     <table>
         <tr>

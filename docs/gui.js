@@ -4,67 +4,67 @@ import '../dist/build.esm.js';
  * Setup controls
  */
 function setupControls() {
-  const btnOpen = document.querySelector('#btnOpen');
-  const btnClose = document.querySelector('#btnClose');
-  const btnPause = document.querySelector('#btnPause');
-  const btnPlay = document.querySelector('#btnPlay');
-  const btnCapture = document.querySelector('#btnCapture');
+  const openButton = document.querySelector('#openButton');
+  const closeButton = document.querySelector('#closeButton');
+  const pauseButton = document.querySelector('#pauseButton');
+  const playButton = document.querySelector('#playButton');
+  const captureButton = document.querySelector('#captureButton');
   const captureContainer = document.querySelector('#captureContainer');
   const captureImg = document.querySelector('#captureImg');
-  const btnCaptureClose = document.querySelector('#btnCaptureClose');
+  const closeCaptureButton = document.querySelector('#closeCaptureButton');
   const captureResolution = document.querySelector('#captureResolution');
   const cameraResolution = document.querySelector('#cameraResolution');
   const captureBytes = document.querySelector('#captureBytes');
 
   // Open camera
-  btnOpen.addEventListener('click', async () => {
+  openButton.addEventListener('click', async () => {
     const [ width, height ] = camera.guiState.resolution.split(',');
     await camera.open(camera.guiState.facing, width, height);
-    btnOpen.classList.add('disabled');
-    btnClose.classList.remove('disabled');
-    btnPause.classList.remove('disabled');
-    btnCapture.classList.remove('disabled');
+    openButton.classList.add('disabled');
+    closeButton.classList.remove('disabled');
+    pauseButton.classList.remove('disabled');
+    captureButton.classList.remove('disabled');
   });
 
   // Close camera
-  btnClose.addEventListener('click', () => {
+  closeButton.addEventListener('click', () => {
     camera.close();
-    btnOpen.classList.remove('disabled');
-    btnClose.classList.add('disabled');
-    btnPause.classList.add('disabled');
-    btnCapture.classList.add('disabled');
+    openButton.classList.remove('disabled');
+    closeButton.classList.add('disabled');
+    pauseButton.classList.add('disabled');
+    captureButton.classList.add('disabled');
   });
 
   // Pause camera
-  btnPause.addEventListener('click', () => {
+  pauseButton.addEventListener('click', () => {
     camera.pause();
-    btnPause.classList.add('disabled');
-    btnPlay.classList.remove('disabled');
+    pauseButton.classList.add('disabled');
+    playButton.classList.remove('disabled');
   });
 
   // Play camera
-  btnPlay.addEventListener('click', () => {
+  playButton.addEventListener('click', () => {
     camera.play();
-    btnPause.classList.remove('disabled');
-    btnPlay.classList.add('disabled');
+    pauseButton.classList.remove('disabled');
+    playButton.classList.add('disabled');
   });
 
   // Take a photo
-  btnCapture.addEventListener('click', () => {
-    // Get the photo data taken
+  captureButton.addEventListener('click', () => {
+    // Get capture data URL.
     const option = {format: camera.guiState.format};// Capture options
     if (camera.guiState.resize) {
       option.width = camera.guiState.width;
       option.height = camera.guiState.height;
       option.fit = camera.guiState.fit;
     }
-    const base64 = camera.capture(option);
+    const capture = camera.capture(option);
 
     // Byte size of capture
-    const bytes = window.atob(base64.split(',')[1]).length;
+    const bytes = window.atob(capture.split(',')[1]).length;
 
     // Show results
-    captureImg.setAttribute('src', base64);
+    captureImg.setAttribute('src', capture);
     captureContainer.classList.remove('hide');
     captureImg.addEventListener('load', () => {
       cameraResolution.textContent = `${camera.resolution.width}x${camera.resolution.height}`;
@@ -74,7 +74,7 @@ function setupControls() {
   });
 
   // Close captured image
-  btnCaptureClose.addEventListener('click', evt => {
+  closeCaptureButton.addEventListener('click', event => {
     captureContainer.classList.add('hide');
   });
 }
@@ -87,12 +87,12 @@ const camera = document.querySelector('#camera');
 
 // Camera event listener
 camera
-  .on('opened', evt => {
+  .on('opened', event => {
     console.log('Opened the camera');
   })
-  .on('played', evt => {
+  .on('played', event => {
     console.log('Camera resumed from pause');
   })
-  .on('paused', evt => {
+  .on('paused', event => {
     console.log('Camera paused');
   });

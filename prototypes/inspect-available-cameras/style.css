@@ -1,0 +1,34 @@
+html, body {
+  font-family: Roboto,sans-serif;
+}
+
+.video {
+  display: block;
+  background: #222 !important;
+  max-width: 100%;
+  width: 240px;
+  height: 160px;
+}
+
+.bi {
+  width: 1em;
+  height: 1em;
+  vertical-align: -.125em;
+  fill: currentcolor
+}
+
+.btn, .form-select  {
+  font-weight: 600;
+}
+
+.btn {
+  --bs-btn-color: var(--bs-emphasis-color);
+  --bs-btn-border-color: var(--bs-emphasis-color);
+  --bs-btn-hover-color: var(--bs-body-bg);
+  --bs-btn-hover-bg: var(--bs-emphasis-color);
+  --bs-btn-hover-border-color: var(--bs-btn-hover-bg)
+}
+
+.btn.disabled, .btn:disabled {
+  opacity: .25;
+}
